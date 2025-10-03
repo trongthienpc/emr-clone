@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Danh sách bệnh viện EMR</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+
+        .controls {
+            padding: 30px;
+            background: #f8f9fa;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .control-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .control-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.9em;
+        }
+
+        select,
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: all 0.3s;
+            background: white;
+        }
+
+        select:focus,
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .stats {
+            padding: 20px 30px;
+            background: #e7f3ff;
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .table-container {
+            padding: 30px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        th {
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+            letter-spacing: 0.5px;
+        }
+
+        th:first-child {
+            border-top-left-radius: 8px;
+        }
+
+        th:last-child {
+            border-top-right-radius: 8px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #e9ecef;
+            transition: all 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+            transform: scale(1.01);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        td {
+            padding: 16px;
+            vertical-align: middle;
+        }
+
+        td.stt {
+            text-align: center;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        td.logo {
+            text-align: center;
+        }
+
+        td.logo img {
+            height: 50px;
+            width: 50px;
+            object-fit: contain;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+        }
+
+        td.name {
+            font-weight: 600;
+            color: #212529;
+        }
+
+        td.website a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        td.website a:hover {
+            color: #764ba2;
+            transform: translateX(5px);
+        }
+
+        .btn-link {
+            display: inline-block;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white !important;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85em;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .loading,
+        .error,
+        .empty {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e9ecef;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error {
+            color: #dc3545;
+        }
+
+        .empty {
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+            }
+
+            .control-group {
+                width: 100%;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            table {
+                font-size: 0.9em;
+            }
+
+            td,
+            th {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Danh sách bệnh viện EMR</h1>
+            <p>Hệ thống quản lý hồ sơ bệnh án điện tử</p>
+            <p>Nguồn: https://benhandientu.moh.gov.vn/</p>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="province">📍 Chọn tỉnh/thành phố</label>
+                <select id="province">
+                    <option value="">-- Chọn tỉnh/thành --</option>
+                    <option value="966">TP. Hà Nội</option>
+                    <option value="967">TP. Hồ Chí Minh</option>
+                    <option value="968">TP. Hải Phòng</option>
+                    <option value="969">TP. Đà Nẵng</option>
+                    <option value="970">TP. Cần Thơ</option>
+                    <option value="971">Tỉnh An Giang</option>
+                    <option value="972">Tỉnh Bắc Giang</option>
+                    <option value="973">Tỉnh Bắc Kạn</option>
+                    <option value="974">Tỉnh Bạc Liêu</option>
+                    <option value="975">Tỉnh Bắc Ninh</option>
+                    <option value="976">Tỉnh Bến Tre</option>
+                    <option value="977">Tỉnh Bình Định</option>
+                    <option value="978">Tỉnh Bình Dương</option>
+                    <option value="979">Tỉnh Bình Phước</option>
+                    <option value="980">Tỉnh Bình Thuận</option>
+                    <option value="981">Tỉnh Cà Mau</option>
+                    <option value="982">Tỉnh Cao Bằng</option>
+                    <option value="983">Tỉnh Đắk Lắk</option>
+                    <option value="984">Tỉnh Đắk Nông</option>
+                    <option value="985">Tỉnh Điện Biên</option>
+                    <option value="986">Tỉnh Đồng Nai</option>
+                    <option value="987">Tỉnh Đồng Tháp</option>
+                    <option value="988">Tỉnh Gia Lai</option>
+                    <option value="989">Tỉnh Hà Giang</option>
+                    <option value="990">Tỉnh Hà Nam</option>
+                    <option value="991">Tỉnh Hà Tĩnh</option>
+                    <option value="992">Tỉnh Hải Dương</option>
+                    <option value="993">Tỉnh Hậu Giang</option>
+                    <option value="994">Tỉnh Hòa Bình</option>
+                    <option value="995">Tỉnh Hưng Yên</option>
+                    <option value="996">Tỉnh Khánh Hòa</option>
+                    <option value="997">Tỉnh Kiên Giang</option>
+                    <option value="998">Tỉnh Kon Tum</option>
+                    <option value="999">Tỉnh Lai Châu</option>
+                    <option value="1000">Tỉnh Lâm Đồng</option>
+                    <option value="1001">Tỉnh Lạng Sơn</option>
+                    <option value="1002">Tỉnh Lào Cai</option>
+                    <option value="1003">Tỉnh Long An</option>
+                    <option value="1004">Tỉnh Nam Định</option>
+                    <option value="1005">Tỉnh Nghệ An</option>
+                    <option value="1006">Tỉnh Ninh Bình</option>
+                    <option value="1007">Tỉnh Ninh Thuận</option>
+                    <option value="1008">Tỉnh Phú Thọ</option>
+                    <option value="1009">Tỉnh Phú Yên</option>
+                    <option value="1010">Tỉnh Quảng Bình</option>
+                    <option value="1011">Tỉnh Quảng Nam</option>
+                    <option value="1012">Tỉnh Quảng Ngãi</option>
+                    <option value="1013">Tỉnh Quảng Ninh</option>
+                    <option value="1014">Tỉnh Quảng Trị</option>
+                    <option value="1015">Tỉnh Sóc Trăng</option>
+                    <option value="1016">Tỉnh Sơn La</option>
+                    <option value="1017">Tỉnh Tây Ninh</option>
+                    <option value="1018">Tỉnh Thái Bình</option>
+                    <option value="1019">Tỉnh Thái Nguyên</option>
+                    <option value="1020">Tỉnh Thanh Hóa</option>
+                    <option value="1021">Tỉnh Thừa Thiên Huế</option>
+                    <option value="1022">Tỉnh Tiền Giang</option>
+                    <option value="1023">Tỉnh Trà Vinh</option>
+                    <option value="1024">Tỉnh Tuyên Quang</option>
+                    <option value="1025">Tỉnh Vĩnh Long</option>
+                    <option value="1026">Tỉnh Vĩnh Phúc</option>
+                    <option value="1027">Tỉnh Yên Bái</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="search">🔍 Tìm kiếm bệnh viện</label>
+                <input type="text" id="search" placeholder="Nhập tên bệnh viện..." />
+            </div>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-icon">🏥</div>
+                <div class="stat-info">
+                    <span class="stat-label">Tổng số bệnh viện</span>
+                    <span class="stat-value" id="totalCount">0</span>
+                </div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-icon">📊</div>
+                <div class="stat-info">
+                    <span class="stat-label">Đang hiển thị</span>
+                    <span class="stat-value" id="displayCount">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 60px;">STT</th>
+                        <th style="width: 120px;">Ngày triển khai</th>
+                        <th style="width: 80px;">Logo</th>
+                        <th>Tên bệnh viện</th>
+                        <th style="width: 200px;">Website</th>
+                        <th style="width: 150px;">Quyết định</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const provinceSelect = document.getElementById("province");
+        const searchInput = document.getElementById("search");
+        const tbody = document.getElementById("tbody");
+        const totalCountEl = document.getElementById("totalCount");
+        const displayCountEl = document.getElementById("displayCount");
+
+        let allHospitals = [];
+        let filteredHospitals = [];
+
+        const showLoading = () => {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="loading">
+                        <div class="spinner"></div>
+                        <div>Đang tải dữ liệu...</div>
+                    </td>
+                </tr>
+            `;
+        };
+
+        const showError = (message) => {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="error">
+                        ❌ ${message}
+                    </td>
+                </tr>
+            `;
+        };
+
+        const showEmpty = () => {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="empty">
+                        📭 Không tìm thấy bệnh viện nào
+                    </td>
+                </tr>
+            `;
+        };
+
+        const updateStats = () => {
+            totalCountEl.textContent = allHospitals.length;
+            displayCountEl.textContent = filteredHospitals.length;
+        };
+
+        const renderTable = (data) => {
+            filteredHospitals = data;
+            updateStats();
+
+            if (data.length === 0) {
+                showEmpty();
+                return;
+            }
+
+            tbody.innerHTML = data.map(h => `
+                <tr>
+                    <td class="stt">${h.stt}</td>
+                    <td>${h.date}</td>
+                    <td class="logo">
+                        ${h.logo ? `<img src="${h.logo}" alt="Logo" onerror="this.style.display='none'" />` : '—'}
+                    </td>
+                    <td class="name">${h.name}</td>
+                    <td class="website">
+                        ${h.website ? `<a href="${h.website}" target="_blank">🔗 Truy cập</a>` : '—'}
+                    </td>
+                    <td>
+                        ${h.decision ? `<a href="${h.decision}" target="_blank" class="btn-link">📄 Xem QĐ</a>` : '—'}
+                    </td>
+                </tr>
+            `).join("");
+        };
+
+        const parseHospitalsFromHTML = (html) => {
+            const doc = new DOMParser().parseFromString(html, "text/html");
+            const rows = doc.querySelectorAll("div.table-benhvien table tbody tr");
+
+            return Array.from(rows).map(tr => {
+                const sttEl = tr.querySelector("td.text-center");
+                const dateEl = tr.querySelector("td span.date");
+                const logoEl = tr.querySelector("td img");
+                const nameEl = tr.querySelector("td h3.name");
+                const websiteEl = tr.querySelector("td a.website");
+                const decisionEl = tr.querySelector("td a.product-datasets__label");
+
+                return {
+                    stt: sttEl?.textContent.trim() || "",
+                    date: dateEl?.textContent.trim() || "",
+                    logo: logoEl?.getAttribute("src") || "",
+                    name: nameEl?.textContent.trim() || "",
+                    website: websiteEl?.getAttribute("href") || "",
+                    decision: decisionEl?.getAttribute("href") || ""
+                };
+            }).filter(h => h.name);
+        };
+
+        const fetchPageData = async (provinceId, page) => {
+            const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://benhandientu.moh.gov.vn/?page=${page}&province_id=${provinceId}`)}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('Không thể tải dữ liệu');
+            return await res.text();
+        };
+
+        const fetchData = async (provinceId) => {
+            showLoading();
+            allHospitals = [];
+            filteredHospitals = [];
+            updateStats();
+
+            try {
+                // Fetch trang đầu tiên
+                const firstPageHTML = await fetchPageData(provinceId, 1);
+                let hospitals = parseHospitalsFromHTML(firstPageHTML);
+
+                if (hospitals.length === 0) {
+                    showEmpty();
+                    return;
+                }
+
+                // Hiển thị dữ liệu trang đầu trước
+                allHospitals = [...hospitals];
+                renderTable(allHospitals);
+
+                // Tiếp tục fetch các trang còn lại
+                let page = 2;
+                let hasMorePages = true;
+
+                while (hasMorePages) {
+                    try {
+                        const pageHTML = await fetchPageData(provinceId, page);
+                        const pageHospitals = parseHospitalsFromHTML(pageHTML);
+
+                        if (pageHospitals.length === 0) {
+                            hasMorePages = false;
+                            break;
+                        }
+
+                        // Thêm vào danh sách và render lại
+                        allHospitals = [...allHospitals, ...pageHospitals];
+
+                        // Chỉ render lại nếu không có search
+                        if (!searchInput.value.trim()) {
+                            renderTable(allHospitals);
+                        }
+
+                        page++;
+                    } catch (error) {
+                        // Nếu lỗi có thể là hết trang
+                        hasMorePages = false;
+                    }
+                }
+
+                // Render cuối cùng với tất cả dữ liệu
+                if (searchInput.value.trim()) {
+                    const keyword = searchInput.value.toLowerCase().trim();
+                    const filtered = allHospitals.filter(h =>
+                        h.name.toLowerCase().includes(keyword)
+                    );
+                    renderTable(filtered);
+                } else {
+                    renderTable(allHospitals);
+                }
+
+            } catch (error) {
+                console.error(error);
+                showError('Lỗi khi tải dữ liệu. Vui lòng thử lại sau.');
+            }
+        };
+
+        provinceSelect.addEventListener("change", () => {
+            const id = provinceSelect.value;
+            searchInput.value = "";
+            if (id) {
+                fetchData(id);
+            } else {
+                allHospitals = [];
+                filteredHospitals = [];
+                updateStats();
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="empty">
+                            👆 Vui lòng chọn tỉnh/thành phố để xem danh sách bệnh viện
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+
+        searchInput.addEventListener("input", () => {
+            const keyword = searchInput.value.toLowerCase().trim();
+            const filtered = allHospitals.filter(h =>
+                h.name.toLowerCase().includes(keyword)
+            );
+            renderTable(filtered);
+        });
+
+        // Initial state
+        updateStats();
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty">
+                    👆 Vui lòng chọn tỉnh/thành phố để xem danh sách bệnh viện
+                </td>
+            </tr>
+        `;
+    </script>
+</body>
+
+</html>
